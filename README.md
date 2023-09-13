@@ -2,6 +2,9 @@
 
 This is the online location for data and data processing notebooks for the glacier-to-bay sediment tracking projects at UWT. Data will also be archived on Teams.
 
+## Notation
+In the instructions below, `code` formatting refers to filenames, keys to press, or something you need to type. Bracketed italics like `[`_`this`_`]` refer to text that you'll need to substitute with something appropriate to your situation (your username, a name you choose for your branch, etc.).
+
 ## Prerequisites
 
 To prepare to use the software and data in this folder, you will need to install the following:
@@ -14,6 +17,8 @@ To prepare to use the software and data in this folder, you will need to install
 - _OPTIONAL_: If you are interested in contributing to the data and notebooks here, you will probably want to learn about the `git` version control system. It's sort of like google docs, but for code (and a lot harder to use...). If you are interested, download [git](https://git-scm.com/) and read [this introduction to using git and github](https://www.digitalocean.com/community/tutorials/how-to-create-a-pull-request-on-github#create-pull-request). 
 
 ## Downloading
+Most students will want to follow the "Easy" directions below.
+
 ### Easy: Zip File
 The easiest way to get the data and notebooks from this site is to click the "<> Code" button on the home page, and select "Download Zip" from the menu that pops up. This will save a compressed (.zip) file to your computer's drive. Navigate to the file and use whatever tools your system has to extract it to a stable place in your computer's file system (I store mine in a folder called "Research" in my Documents; you should do whatever makes sense to you). You should end up with a folder called `glacier-bay-uwt-student-projects` with a number of files, folders, and subfolders.
 
