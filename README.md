@@ -3,7 +3,7 @@
 This is the online location for data and data processing notebooks for the glacier-to-bay sediment tracking projects at UWT. Data will also be archived on Teams.
 
 ## Notation
-In the instructions below, `code` formatting refers to filenames, keys to press, or something you need to type. Bracketed italics like <pre><code>[<i>this</i>]</code></pre> refer to text that you'll need to substitute with something appropriate to your situation (your username, a name you choose for your branch, the name of a package you want to install, etc.).
+In the instructions below, `code` formatting refers to filenames, keys to press, or something you need to type. Bracketed italics like <code>[<i>this</i>]</code> refer to text that you'll need to substitute with something appropriate to your situation (your username, a name you choose for your branch, the name of a package you want to install, etc.).
 
 ## Prerequisites
 
