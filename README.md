@@ -9,7 +9,7 @@ In the instructions below, `code` formatting refers to filenames, keys to press,
 
 To prepare to use the software and data in this folder, you will need to install the following:
 - [Anaconda Python](https://www.anaconda.com/download) - This distribution of the Python programming language comes with most of the packages (like plugins in other software) you will need. Use the free version, since you are not using it for commercial work.
-- Also install the following packages using <pre><code>conda install [<i>package_name</i>]</code></pre>:
+- Also install the following packages using <code>conda install [<i>package_name</i>]</code>:
   - Altair: [altair](https://anaconda.org/conda-forge/altair) - Data visualization package, like ggplot in R
   - Altair Data Server: [altair_data_server](https://anaconda.org/conda-forge/altair_data_server) - For visualizing large datasets
 - Follow the instructions on the [PmagPy site](https://pmagpy.github.io/PmagPy-docs/installation/PmagPy_install.html) to install the PmagPy package for processing paleomagnetic and rock magnetic data. *NOTE*: follow the detailed instructions under "You can find more specific pip install instructions" for your particular system. *Do not*  do the `pip install` commands listed on the main page.
@@ -29,16 +29,16 @@ This page is the home page of a set of online files and folders on the Github we
 2. From the main page of this repository, click the "Fork" button. Using the _Owner_ menu, choose yourself as the owner. Write a description of what you plan to do, and click "Create fork".
 3. Once the new fork is created, click the name of the repository on the screen that comes next. Make sure you are viewing the fork you just created: your username will appear in the top left of the page, near the Github icon. If it doesn't, click the triangle next to the Fork button and select your username.
 4. Click the green "<> Code" button and copy the URL displayed under "Code".
-5. Open up a Powershell (Windows) or Terminal (Mac) window and change directory (<pre><code>cd <i>[path_to_folder]</i></code></pre>) to the place in your file system where you want to store your work.
-6. Type the command <pre><code>git clone <i>[copied_url]</i></code></pre>, where _`copied_url`_ is the URL you copied in step 4.
+5. Open up a Powershell (Windows) or Terminal (Mac) window and change directory (<code>cd <i>[path_to_folder]</i></code>) to the place in your file system where you want to store your work.
+6. Type the command <code>git clone <i>[copied_url]</i></code>, where _`copied_url`_ is the URL you copied in step 4.
 7. Change your working folder into the folder you just created (probably `cd glacier-bay-uwt-student-projects`). This is called the _base directory_ for the repository.
-8. Type the command <pre><code>git branch <i>[new_branch]</i></code></pre>, where _`new_branch`_ is a title that describes some change in the code or data that you are working on (e.g. `process-irm-data` or `image-analysis`). Titles can't have spaces in their names (we usually use dashes instead), and are usually all lower case.
-9. Type the command <pre><code>git checkout <i>[new_branch]</i></code></pre>.
+8. Type the command <code>git branch <i>[new_branch]</i></code>, where _`new_branch`_ is a title that describes some change in the code or data that you are working on (e.g. `process-irm-data` or `image-analysis`). Titles can't have spaces in their names (we usually use dashes instead), and are usually all lower case.
+9. Type the command <code>git checkout <i>[new_branch]</i></code>.
 10. Make any changes to the files or folders you need to make (using whatever software you want).
 11. When you are done making changes, go back to Powershell or Terminal and navigate back to the base directory.
 12. Type the command `git add \*` or `git add -A` to _get your local system ready_ to sync all of your changes with the remote repository.
-13. Type the command <pre><code>git commit -m "<i>[message]</i>"</code></pre>, where _`message`_ is a description of the changes you made.
-14. Type the command <pre><code>git push --set-upstream origin <i>[new_branch]</i></code></pre> to _actually_ sync the changes with the remote repository.
+13. Type the command <code>git commit -m "<i>[message]</i>"</code>, where _`message`_ is a description of the changes you made.
+14. Type the command <code>git push --set-upstream origin <i>[new_branch]</i></code> to _actually_ sync the changes with the remote repository.
 
  ## Contents
  This repository is organized as follows:
