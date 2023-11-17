@@ -12,8 +12,11 @@ import re
 import scipy.interpolate as spi
 import scipy.optimize as spo
 import scipy.stats as sps
+import scipy.signal as spsig
+import scipy.special as spspecial
 import altair as alt
 from pathlib import Path
+from scipy.special import gamma
 import re
 
 ## Functions
@@ -126,11 +129,11 @@ def process_dcd(segments,
     except:
         Hcr=np.nan
     try:
-        IRM_80mT=dcd_sp(-80)
+        IRM_80mT=dcd_sp(80.E-3)
     except:
         IRM_80mT=np.nan
     return {'Hcr':Hcr,
-            'IRM_80mT':IRM_80mT,
+            'IRM_m80mT':IRM_80mT,
             'dcd_curve':dcd_curve,
             'dcd_interpolated':dcd_interpolated}
              
@@ -161,32 +164,72 @@ def process_irm(segments,
     results = process_irm(segments,
                                     data,
                                     Hgrid=None,
-                                    lam=0.5)
+                                    lam=0.5,
+                                    smooth=None)
         Smooth irm curve and extract useful parameters: Hcr, IRM_80mT
     """    
     irm_curve=data.loc[(data['type']=='irm')].copy()
-    irm_curve=irm_curve.sort_values(by='field').reset_index(drop=True)
+    irm_curve=irm_curve[irm_curve['field']>=0]
+    #irm_curve=irm_curve.sort_values(by='field').reset_index(drop=True)
     Hmax=np.max(np.abs(irm_curve['field'].values))
     if (Hgrid is None):
         N=len(irm_curve)
         Hgrid=make_hgrid2(N,Hmax)
     if (smooth is None):
         smooth = 10**(2.0*np.ceil(np.log10(0.1*np.min(np.abs(irm_curve.remanence)))))
-    irm_sp=spi.UnivariateSpline(irm_curve['field'].values,irm_curve['remanence'].values,s=smooth,ext='extrapolate')
+    max_field=irm_curve['field'].max()
+    irm_periodic=pd.DataFrame({'field':np.concatenate((np.flip(-irm_curve['field'].values),irm_curve['field'].values,
+                                                       np.flip((2*max_field)-irm_curve['field'].values))),
+                               'remanence':np.concatenate((np.flip(irm_curve['remanence'].values),irm_curve['remanence'].values,
+                                                           np.flip(irm_curve['remanence'].values)))})
+    irm_sp=spi.UnivariateSpline(irm_periodic['field'].values,irm_periodic['remanence'].values,s=smooth,ext='extrapolate')
     irm_interpolated=pd.DataFrame({'field':Hgrid,
                                      'remanence':irm_sp(Hgrid)})
     irm_normalized=irm_interpolated.copy()
     irm_normalized['remanence']=irm_normalized['remanence']/irm_normalized['remanence'].max()
     irm_derivative=irm_normalized.copy()
     irm_derivative['gradient']=pd.Series(np.gradient(irm_derivative['remanence'],irm_derivative['field']))
+    try:
+        SIRM=irm_interpolated['remanence'].max()
+    except:
+        SIRM=np.nan
+    try:
+        IRM_50mT=irm_sp(50.E-3)
+    except:
+        IRM_50mT=np.nan
+    try:
+        IRM_80mT=irm_sp(80.E-3)
+    except:
+        IRM_80mT=np.nan
+    try:
+        IRM_100mT=irm_sp(100.E-3)
+    except:
+        IRM_100mT=np.nan
+    try:
+        IRM_300mT=irm_sp(300.E-3)
+    except:
+        IRM_300mT=np.nan
     #irm_interpolated=irm_interpolated.sort_values(by='field').reset_index(drop=True)
     #irm_interpolated.drop_duplicates(subset='remanence',inplace=True)
     #irm_interpolated.drop_duplicates(subset='field',inplace=True)
-    
     return {'irm_curve':irm_curve,
             'irm_interpolated':irm_interpolated,
             'irm_normalized':irm_normalized,
-            'irm_derivative':irm_derivative}
+            'irm_derivative':irm_derivative,
+            'SIRM':SIRM,
+            'IRM_50mT':IRM_50mT,
+            'IRM_80mT':IRM_80mT,
+            'IRM_100mT':IRM_100mT,
+            'IRM_300mT':IRM_300mT}
+
+def irm_fit(data, guess=None):
+    if (guess is None):
+        v=list(data['gradient'].values())
+        f=list(data['field'].values())
+        peaks,_=spsig.find_peaks(v)
+        guess=[1., f[peaks[0]], 1.0, 0.1, 1.0]
+    popt, pcov=spo.curve_fit(sgg,guess,bounds=([0, 0, -1., 0],[inf, inf, 1., inf]))
+    return popt
 
 def corr_loop(Hoff,upper,lower,return_params=False):
     # Function to minimize in process_hyst to find horizontal and vertical offset
@@ -219,13 +262,15 @@ def process_hyst(segments,
                  lam=0.5,
                  offset_correct=True,
                  fraction_saturation=0.7,
-                 smooth=None):
+                 smooth=None,
+                 initial_susceptibiity_field=15.E-3):
     """
     results = process_hyst(segments,
                                     data,
                                     lam=0.5,
                                     offsset_correct=True,
-                                    fraction_saturation=0.7)
+                                    fraction_saturation=0.7,
+                                    initial_susceptibiity_field=15.E-3)
         Smooth hysteresis loop and extract useful parameters: Mrs, Ms, Ki, Khf, etc.
     """
     # Step 1 of approach: split loop into initial, upper, and lower branches
@@ -238,6 +283,14 @@ def process_hyst(segments,
     initial_loop=data.iloc[initial_start:initial_end,0:2]
     upper_loop=data.iloc[upper_start:upper_end,0:2]
     lower_loop=data.iloc[lower_start:lower_end,0:2]
+    # Calculate initial susceptibility from initial loop at fields below initial_susceptibiity_field
+    init_linear = initial_loop.loc[(initial_loop['field']<=initial_susceptibiity_field),:]
+    print('init_linear',init_linear)
+    init_params=sps.stats.linregress(init_linear['field'].values,init_linear['moment'].values)
+    Xinit=init_params[0]
+    #except:
+    #    print('Xinit failed. Xinit = np.nan')
+    #    Xinit=np.nan
     # Iteratively solve the following problem:
     #   For each Hoff from -Hmax to Hmax
     #   Invert lower loop through Hoff,0
@@ -373,6 +426,7 @@ def process_hyst(segments,
             'Mrs':Mrs,
             'Ms':Ms,
             'Xhf':Xhf,
+            'Xinit':Xinit,
             'Mrsp':Mrsp,
             'Hc':Hc,
             'Hcp':Hcp,
@@ -447,3 +501,29 @@ def plot_hyst_report(result,fig,id):
     return (ax_hyst_main,
             ax_hyst_inset,
             ax_err)
+
+def sgg(x, *params):
+    # Skewed Generalized Gaussian (see Egli, 2004a eq. 1)
+    fx=np.zeros_like(x)
+    A, mu, sigma, p, q = params
+    xprime=x-mu/sigma
+    v = 1/((2.**(1.+(1./p)))*sigma*spspecial.gamma(1+(1/p)))
+    m = (abs((q*np.exp(q*xprime))+((np.exp(xprime/q))/q)))/((np.exp(q*xprime))+(np.exp(xprime/q)))
+    fx = A*v*m*np.exp(-0.5*(abs(np.log((np.exp(q*xprime))+(np.exp(xprime/q)))))**p)
+
+    return fx
+
+def multi_sgg(x, *params):
+    fx=np.zeros_like(x)
+    for i in range(0, len(params), 5):
+        fx = fx + sgg(x, params[i:i+5])
+    return fx
+    
+## Data
+dunlop_SDMD1=pd.DataFrame({'soft_component':[0,10,20,30,40,50,60,70,80,90,100],'HcrHc':[1.4193,1.492,1.5859,1.6859,1.8121,1.9695,2.1766,2.4731,2.9053,3.6082,4.9541],'MrMs':[0.3767,0.337,0.3066,0.2683,0.2321,0.1975,0.1608,0.1245,0.0886,0.0531,0.0181]})
+
+dunlop_SDMD2=pd.DataFrame({'soft_component':[0,10,20,30,40,50,60,70,80,90,100],'HcrHc':[1.2422,1.2915,1.3205,1.3806,1.4595,1.5514,1.677,1.895,2.2635,2.9878,5.3536],'MrMs':[0.4948,0.4426,0.4005,0.3524,0.3016,0.2581,0.2101,0.1608,0.1139,0.0668,0.0186]})
+
+dunlop_SP10SD=pd.DataFrame({'soft_component':[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85],'HcrHc':[1.256,1.4111,1.6209,1.9355,2.324,2.6993,3.1006,3.5617,4.1369,4.8051,5.5811,6.4827,7.7415,9.245,11.2878,14.17,18.3904],'MrMs':[0.4975,0.4731,0.4425,0.4231,0.4001,0.37,0.3498,0.3235,0.296,0.2723,0.2476,0.2215,0.197,0.1705,0.1491,0.1241,0.0982]})
+
+dunlop_SP15SD=pd.DataFrame({'soft_component':[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80],'HcrHc':[1.256,1.6118,1.9679,2.4701,3.7433,7.3197,9.0864,11.0323,13.2473,15.9072,19.2076,23.4512,28.7924,35.5468,45.3712,59.5404],'MrMs':[0.5003,0.4474,0.4231,0.3978,0.3719,0.3494,0.3249,0.3005,0.2748,0.2499,0.2236,0.2,0.1739,0.1505,0.1252,0.1002]})
