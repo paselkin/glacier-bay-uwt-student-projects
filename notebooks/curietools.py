@@ -122,7 +122,7 @@ def process_curie(curie_data,
     SG2=alt.Chart(curie_data).mark_line().encode(
         alt.X('temperature:Q'),
         alt.Y('smoothed_gradient2:Q'),
-        alt.Color('curve_type:N', axis=alt.Axis(title='Curve Type'))
+        alt.Color('curve_type:N')
     )
     susc_heating_inverse=1./susc_heating_smooth.reset_index(drop=True)
     susc_cooling_inverse=1./susc_cooling_smooth.reset_index(drop=True)
@@ -131,7 +131,7 @@ def process_curie(curie_data,
     PI=alt.Chart(curie_data).mark_circle(size=10).encode(
         alt.X('temperature:Q', axis=alt.Axis(title='T (C)')),
         alt.Y('susceptibility_inverse:Q', axis=alt.Axis(title='1/K (1/SI)')),
-        alt.Color('curve_type:N', axis=alt.Axis(title='Curve Type')),
+        alt.Color('curve_type:N'),
         alt.Tooltip(['temperature:Q','curve_type:N'])
     ).interactive()
     susc_heating_inverse_gradient=pd.Series(np.gradient(susc_heating_inverse.to_numpy(), temp_heating.to_numpy())).reset_index(drop=True)
@@ -141,7 +141,7 @@ def process_curie(curie_data,
     PIG=alt.Chart(curie_data).mark_circle(size=2).encode(
         alt.X('temperature:Q', axis=alt.Axis(title='T (C)')),
         alt.Y('susceptibility_inverse_gradient:Q', axis=alt.Axis(title='d/dT[1/K] (1/C*SI)')),
-        alt.Color('curve_type:N', axis=alt.Axis(title='Curve Type'))
+        alt.Color('curve_type:N')
     )
     
     susc_heating_inverse_gradient_smooth=susc_heating_inverse_gradient.rolling(smooth).mean().reset_index(drop=True)
@@ -152,7 +152,7 @@ def process_curie(curie_data,
     PIGS=alt.Chart(curie_data).mark_line().encode(
         alt.X('temperature:Q'),
         alt.Y('susceptibility_inverse_gradient_smooth:Q'),
-        alt.Color('curve_type:N', axis=alt.Axis(title='Curve Type'))
+        alt.Color('curve_type:N')
     )
     
     display(PI+PIG+PIGS)
@@ -199,7 +199,7 @@ def process_curie(curie_data,
     PIL=alt.Chart(curie_data).mark_line().encode(
         alt.X('temperature:Q'),
         alt.Y('susceptibility_inverse_linear:Q'),
-        alt.Color('curve_type:N', axis=alt.Axis(title='Curve Type'))
+        alt.Color('curve_type:N')
     )
     
     compound_chart=(P+S|G+SG|G2+SG2|PI+PIG+PIL).properties(
