@@ -55,7 +55,7 @@ def process_curie(curie_data,
     P=alt.Chart(curie_data).mark_circle(size=10).encode(
         alt.X('temperature:Q', axis=alt.Axis(title='T (C)')),
         alt.Y('corrected_susceptibility:Q', axis=alt.Axis(title='K (SI)')),
-        alt.Color('curve_type:N', axis=alt.Axis(title='Curve Type')),
+        alt.Color('curve_type:N'),
         alt.Tooltip(['temperature:Q','curve_type:N'])
     ).interactive()
 
@@ -73,7 +73,7 @@ def process_curie(curie_data,
     S=alt.Chart(curie_data).mark_line().encode(
         alt.X('temperature:Q', axis=alt.Axis(title='T (C)')),
         alt.Y('smoothed_susceptibility:Q', axis=alt.Axis(title='K (SI)')),
-        alt.Color('curve_type:N', axis=alt.Axis(title='Curve Type'))
+        alt.Color('curve_type:N')
     )
     susc_heating_gradient=pd.Series(np.gradient(susc_heating_smooth.to_numpy(), temp_heating.to_numpy())).reset_index(drop=True)
     susc_cooling_gradient=pd.Series(np.gradient(susc_cooling_smooth.to_numpy(), temp_cooling.to_numpy())).reset_index(drop=True)
@@ -82,7 +82,7 @@ def process_curie(curie_data,
     G=alt.Chart(curie_data).mark_circle(size=10).encode(
         alt.X('temperature:Q', axis=alt.Axis(title='T (C)')),
         alt.Y('susceptibility_gradient:Q', axis=alt.Axis(title='dK/dT (SI/C)')),
-        alt.Color('curve_type:N', axis=alt.Axis(title='Curve Type')),
+        alt.Color('curve_type:N'),
         alt.Tooltip(['temperature:Q','curve_type:N'])
     ).interactive()
     susc_heating_gradient_mirrored=pd.concat([susc_heating_gradient[::-1],susc_heating_gradient,susc_heating_gradient[::-1]],\
@@ -97,7 +97,7 @@ def process_curie(curie_data,
     SG=alt.Chart(curie_data).mark_line().encode(
         alt.X('temperature:Q'),
         alt.Y('smoothed_gradient:Q'),
-        alt.Color('curve_type:N', axis=alt.Axis(title='Curve Type'))
+        alt.Color('curve_type:N')
     )
     
     susc_heating_gradient2=pd.Series(np.gradient(susc_heating_gradient_smooth.to_numpy(), temp_heating.to_numpy())).reset_index(drop=True)
@@ -107,7 +107,7 @@ def process_curie(curie_data,
     G2=alt.Chart(curie_data).mark_circle(size=10).encode(
         alt.X('temperature:Q',axis=alt.Axis(title='T (C)')),
         alt.Y('susceptibility_gradient2:Q', axis=alt.Axis(title='d2K/dT2 (SI2/C2)')),
-        alt.Color('curve_type:N', axis=alt.Axis(title='Curve Type')),
+        alt.Color('curve_type:N'),
         alt.Tooltip(['temperature:Q','curve_type:N'])
     ).interactive()
     susc_heating_gradient2_mirrored=pd.concat([susc_heating_gradient2[::-1],susc_heating_gradient2, susc_heating_gradient2[::-1]],\
